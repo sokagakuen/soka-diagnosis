@@ -1,0 +1,12 @@
+{
+  "name": "soka-diagnosis",
+  "version": "1.0.0",
+  "description": "世界市民タイプ診断アプリケーション",
+  "main": "index.html",
+  "scripts": {
+    "build": "echo 'Build complete - Functions should be deployed'",
+    "dev": "echo 'Development mode'"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}
