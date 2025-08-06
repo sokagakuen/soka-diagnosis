@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>世界市民タイプ診断</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+    <div id="root"></div>
+    <script type="text/babel">
+        const { useState, useEffect, useMemo } = React;
+        const elementaryQuestions = [ { question: "休み時間、ひとりであそんでいる転校生がいるよ。きみならどうする？", answers: [ { text: "「いっしょにドッジボールしよう！」と、思いきってこえをかける。", type: 'courage' }, { text: "どんなあそびがすきなのかな？と、すこしはなれたところから考える。", type: 'wisdom' }, { text: "さみしくないかな…と、気になって、つい目で追ってしまう。", type: 'compassion' }, ], }, { question: "クラスでいきものがかりをきめる時、だれもやりたがらない。きみならどうする？", answers: [ { text: "「じゃあ、わたし・ぼくがやるよ！」と、ゆうきをだして手をあげる。", type: 'courage' }, { text: "どうすればみんながやりたくなるか、たのしいアイデアをみんなに話す。", type: 'contribution' }, { text: "いきものだって、おせわされないと可哀想だな…と心がいたむ。", type: 'compassion' }, ], }, { question: "まちたんけんで、こまっている外国からの旅行者をみかけた。きみならどうする？", answers: [ { text: "「ハロー！」とげんきにあいさつして、たすけてあげようとする。", type: 'courage' }, { text: "きっとこまっているだろうな…と、おうちの人やお店の人によびかける。", type: 'compassion' }, { text: "どこへいきたいのかな？と、旅行者がもっている地図をみてみる。", type: 'wisdom' }, ], }, { question: "きみがもっている、とくべつなパワーはどれにちかい？", answers: [ { text: "だれとでもすぐになかよくなれる「なかよしパワー」", type: 'contribution' }, { text: "みんなをまとめることができる「リーダーパワー」", type: 'courage' }, { text: "いろいろなことをしらべたり、はっけんしたりする「はかせパワー」", type: 'wisdom' }, ], }, ];
+        const juniorHighQuestions = [ { question: "クラスのグループチャット。一部の人が、ある子の悪口で盛り上がっている…。君ならどうする？", answers: [ { text: "なんでそんな話になったんだろう…と、静かに会話をさかのぼって状況を確かめる。", type: 'wisdom' }, { text: "悪口を言われている子のことを考えると、なんだか悲しい気持ちになる。", type: 'compassion' }, { text: "「そういう話、やめなよ」と、勇気を出して書き込む。", type: 'courage' }, { text: "面白いスタンプを送ったりして、空気を変えて話題を変えようと頑張る。", type: 'contribution' }, ], }, { question: "英語の授業で、ALTの先生が質問。でも、誰も答えられずシーン…。君ならどうする？", answers: [ { text: "辞書アプリで単語を調べてでも、ちゃんとした答えを伝えようとする。", type: 'wisdom' }, { text: "先生、困ってるだろうな…。シーンとした空気、なんだか申し訳ないなと感じる。", type: 'compassion' }, { text: "間違えてもいいや！と覚悟して、「えーっと…」と一番に声を出してみる。", type: 'courage' }, { text: "隣の席の友達に「ねえ、あれって何だっけ？」と相談して、一緒に答える。", type: 'contribution' }, ], }, { question: "グループでの調べ学習。「私たちの町をより良くするには？」というテーマになった。まず、何をしたい？", answers: [ { text: "まずは図書館に行って、町のデータや歴史が載っている本を探したい。", type: 'wisdom' }, { text: "「どんなことに困っていますか？」と、町のお年寄りやお店の人にインタビューしたい。", type: 'compassion' }, { text: "「まずはあそこに行ってみよう！」と、グループの先頭に立ってみんなを引っ張りたい。", type: 'courage' }, { text: "みんなの意見を聞いて、「じゃあ、こういう役割分担で進めよう！」と計画を立てたい。", type: 'contribution' }, ], }, { question: "部活の練習試合で負けて、チームの雰囲気が最悪…。君ならどうする？", answers: [ { text: "なぜ負けたのか、相手チームとの違いを冷静に分析して、次の作戦を考える。", type: 'wisdom' }, { text: "落ち込んでいる仲間のところにいき、「ドンマイ！」と声をかけて話を聞く。", type: 'compassion' }, { text: "「次こそ絶対勝つぞ！」と、誰よりも大きな声を出して、みんなを元気づける。", type: 'courage' }, { text: "「みんなで今日の反省会をしない？」と提案して、チームが前を向けるように協力する。", type: 'contribution' }, ], }, { question: "文化祭や体育祭。君が一番「燃える」のは、どんな役割？", answers: [ { text: "勝つための作戦を練ったり、データを分析したりする「参謀（さんぼう）」役。", type: 'wisdom' }, { text: "悩んでいる仲間を励ましたり、相談に乗ったりする「マネージャー」役。", type: 'compassion' }, { text: "選手や代表として、みんなの前に立って活躍する「スター」役。", type: 'courage' }, { text: "みんなの意見をまとめ、一つのものを作り上げていく「監督」役。", type: 'contribution' }, ], }, ];
+        const highSchoolQuestions = [ { question: "SNSで社会問題について議論が白熱している。あなたならどうする？", answers: [ { text: "感情的な意見に流されず、関連ニュースやデータを調べて客観的な事実を把握しようとする。", type: 'wisdom' }, { text: "対立する意見の背景にある人々の気持ちを想像し、なぜそう思うのか理解しようと努める。", type: 'compassion' }, { text: "自分の意見が少数派でも、場の空気を読んで黙るのではなく、丁寧に自分の考えを発信する。", type: 'courage' }, { text: "議論がより良くなるように、新しい視点や折衷案を提案し、対話の橋渡し役になる。", type: 'contribution' }, ], }, { question: "進路について悩んでいる友人から相談を受けた。どうアドバイスする？", answers: [ { text: "友人の興味や得意なことを分析し、関連する学部や職業の情報を集めて客観的な選択肢を示す。", type: 'wisdom' }, { text: "まず友人の不安や焦りをじっくり聞き、その気持ちに寄り添うことを最優先する。", type: 'compassion' }, { text: "「周りの評価より、本当にやりたいことに挑戦すべきだ」と、友人の背中を押す言葉をかける。", type: 'courage' }, { text: "自分の知っている先輩や詳しい先生を紹介し、新たな繋がりを作る手助けをする。", type: 'contribution' }, ], }, { question: "学校の近くで、地域の清掃ボランティアの募集を見かけた。どう思う？", answers: [ { text: "なぜこの地域で清掃が必要なのか、ゴミ問題の根本的な原因について考えてしまう。", type: 'wisdom' }, { text: "活動している人々の姿を見て、地域を思う気持ちに温かいものを感じ、自分も何かしたくなる。", type: 'compassion' }, { text: "「参加しよう」とすぐ決意し、友人も誘って一緒に行動を起こす。", type: 'courage' }, { text: "ただゴミを拾うだけでなく、もっと効率的な方法や、ゴミを減らすキャンペーンを企画できないか考える。", type: 'contribution' }, ], }, { question: "文化祭の準備で、クラスの意見がまとまらず計画が停滞している。あなたなら？", answers: [ { text: "各意見のメリット・デメリットを整理した資料を作り、冷静な判断ができるように促す。", type: 'wisdom' }, { text: "対立しているグループ双方の話を聞き、それぞれの言い分や感情を理解しようと努める。", type: 'compassion' }, { text: "「このままでは間に合わない。リーダーとして私が責任を持つから、この案で進めよう」と決断する。", type: 'courage' }, { text: "両方のアイデアの良い部分を取り入れたハイブリッド案を考え、みんなが納得できる着地点を探る。", type: 'contribution' }, ], }, { question: "あなたが最も「価値がある」と感じる学びはどんなもの？", answers: [ { text: "一つのテーマを深く掘り下げ、誰も知らなかった真実や法則を発見する学び。", type: 'wisdom' }, { text: "歴史や文学を通じて、他者の人生や多様な文化に触れ、人間理解を深める学び。", type: 'compassion' }, { text: "ディベートや実践活動を通じて、困難な課題に挑戦し、自分を成長させる学び。", type: 'courage' }, { text: "チームで協力し、一つのプロジェクトを成し遂げることで、社会に貢献する学び。", type: 'contribution' }, ], }, ];
+        const universityQuestions = [ { question: "興味深い講義だが、自分の専門とは少し違う。あなたならどうする？", answers: [ { text: "自分の専門分野とどう繋がるか考え、知のネットワークを広げるチャンスと捉え履修する。", type: 'wisdom' }, { text: "その分野を学ぶ人々の価値観や視点に興味を持ち、自分の世界を広げるために受講する。", type: 'compassion' }, { text: "単位や評価を気にせず、知的好奇心に従って「面白そう」という直感で挑戦してみる。", type: 'courage' }, { text: "その講義で得た知識を、自分のサークル活動やプロジェクトに応用できないか考える。", type: 'contribution' }, ], }, { question: "サークル活動で、伝統的なやり方と新しいやり方が対立している。どうする？", answers: [ { text: "過去の経緯と新しい方法のメリットを客観的に分析し、データに基づいて最適な選択を提案する。", type: 'wisdom' }, { text: "伝統を重んじる先輩の気持ちと、変革を望む後輩の気持ち、両方に耳を傾け、相互理解の場を設ける。", type: 'compassion' }, { text: "失敗を恐れず、まずは試験的に新しいやり方を導入することをリーダーとして決断し、責任を持つ。", type: 'courage' }, { text: "伝統の良さを活かしつつ、新しい要素を取り入れた折衷案を考え、組織全体の発展を目指す。", type: 'contribution' }, ], }, { question: "アルバイト先で、外国人スタッフが言葉の壁で困っているようだ。あなたなら？", answers: [ { text: "業務マニュアルの重要な部分を翻訳したり、イラストを使って分かりやすく説明したりする。", type: 'wisdom' }, { text: "休憩時間に積極的に話しかけ、日本の生活での不安や悩みを聞き、精神的な支えになろうとする。", type: 'compassion' }, { text: "他のスタッフに「みんなでサポートしよう」と呼びかけ、チーム全体で助け合う雰囲気を作る。", type: 'courage' }, { text: "多言語対応のツールを導入したり、研修制度の改善を店長に提案したりする。", type: 'contribution' }, ], }, { question: "就職活動。企業を選ぶ上で最も重視する点は？", answers: [ { text: "その企業が持つ独自の技術や、業界の将来性を徹底的に分析し、自分の専門性が活かせるかを判断する。", type: 'wisdom' }, { text: "その企業の理念や社会貢献活動に共感できるか、社員が互いを尊重しあう文化があるかを重視する。", type: 'compassion' }, { text: "安定した大企業よりも、若いうちから裁量権を持って挑戦できるベンチャー企業に魅力を感じる。", type: 'courage' }, { text: "自分の仕事を通じて、社会や人々の生活をより良くすることに直接的に貢献できるかを考える。", type: 'contribution' }, ], }, { question: "長期休暇。あなたならどんな過ごし方を選ぶ？", answers: [ { text: "特定のテーマを決め、専門書を読んだり、関連施設を訪れたりして、集中的に知識を深める。", type: 'wisdom' }, { text: "普段行かないような国や地域へ行き、現地の人々の生活や文化にどっぷり浸かる旅をする。", type: 'compassion' }, { text: "ヒッチハイクやボランティアなど、予測不可能な出会いや挑戦に満ちた冒険に出る。", type: 'courage' }, { text: "仲間と共にイベントを企画したり、地域活性化のプロジェクトに参加したりする。", type: 'contribution' }, ], }, ];
+        const workingAdultQuestions = [ { question: "担当プロジェクトが壁にぶつかった。まずどうする？", answers: [ { text: "問題の根本原因を特定するため、データを分析し、過去の類似ケースを調査する。", type: 'wisdom' }, { text: "疲弊しているチームメンバーのケアを優先し、まずは話を聞いて精神的な負担を軽減する。", type: 'compassion' }, { text: "現状を打開するため、リスクを承知で新しいアプローチを試すことを決断し、チームを率いる。", type: 'courage' }, { text: "他部署や社外の専門家に協力を仰ぎ、新たな視点やリソースを取り入れて解決策を探る。", type: 'contribution' }, ], }, { question: "職場で、自分の意見とは異なる方針が決定された。どう対応する？", answers: [ { text: "決定の背景にあるロジックやデータを理解しようと努め、その上で自分の役割を考える。", type: 'wisdom' }, { text: "決定に不満を持つ同僚の気持ちを受け止めつつ、チーム全体の目標達成のために協力する姿勢を示す。", type: 'compassion' }, { text: "納得できない点については、建設的な代替案を用意した上で、改めて上司や関係者と対話の機会を持つ。", type: 'courage' }, { text: "決定された方針の中で、自分が貢献できる部分を見つけ、プロジェクトを成功に導くために全力を尽くす。", type: 'contribution' }, ], }, { question: "キャリアアップについて考える時、最も惹かれるのは？", answers: [ { text: "専門知識を極め、その分野で誰にも負けない第一人者（スペシャリスト）になること。", type: 'wisdom' }, { text: "多様なバックグラウンドを持つ人々をまとめ、育成することで、チーム全体の成果を最大化するマネージャーになること。", type: 'compassion' }, { text: "前例のない事業やサービスを立ち上げ、新しい市場を創造する起業家やイノベーターになること。", type: 'courage' }, { text: "自分のスキルや経験を活かして、NPOや地域活動など、社会的な課題の解決に貢献すること。", type: 'contribution' }, ], }, { question: "忙しい毎日。プライベートの時間をどう使いたい？", answers: [ { text: "興味のある分野のセミナーに参加したり、資格の勉強をしたりして、自己投資の時間を確保したい。", type: 'wisdom' }, { text: "家族や親しい友人との対話の時間を大切にし、心穏やかに過ごしたい。", type: 'compassion' }, { text: "新しい趣味やスポーツに挑戦し、仕事とは違う世界で自分を試したい。", type: 'courage' }, { text: "地域のイベントやボランティアに参加し、社会との繋がりを感じたい。", type: 'contribution' }, ], }, { question: "あなたの人生にとって「仕事」とは？", answers: [ { text: "知的好奇心を満たし、自己の専門性を探求するための手段。", type: 'wisdom' }, { text: "様々な人々と関わり、人間として成長するための舞台。", type: 'compassion' }, { text: "困難な目標に挑戦し、自己実現を達成するための挑戦。", type: 'courage' }, { text: "社会に価値を提供し、他者に貢献するためのプラットフォーム。", type: 'contribution' }, ], }, ];
+        const elementaryResults = { courage: { title: "ゆうきのヒーロー", catchphrase: "その一歩が、みんなを笑顔にする！", description: "こまっている人をみかけたら、いちばんにかけつける！そんな勇気をもったヒーローだ。きみのその一歩が、みんなを笑顔にするんだ。", power: "チャレンジせいしん、こうどうりょく", growthHint: "たくさんのともだちと話すチャンスや、あたらしいことに挑戦する授業で、きみの勇気はもっとかがやく！", color: "bg-gradient-to-br from-red-400 to-orange-500", }, compassion: { title: "やさしさのヒーロー", catchphrase: "そのやさしさが、だれかの光になる。", description: "ともだちの気持ちを自分のことのように感じられる、やさしい心のヒーローだ。きみがそばにいるだけで、みんなが安心できるんだ。", power: "きょうかんりょく、おもいやり", growthHint: "「いのち」のたいせつさを学ぶ授業で、きみのやさしさは、せかい中の人々を思う大きな気持ちにそだっていくよ。", color: "bg-gradient-to-br from-pink-400 to-rose-500", }, wisdom: { title: "アイデアのヒーロー", catchphrase: "きみのひらめきが、未来をつくる！", description: "「どうしてだろう？」と考えたり、みんなが「おもしろい！」と思うようなアイデアをだしたりするのが得意なヒーローだ。きみのひらめきが、みんなのピンチをすくう！", power: "はっそうりょく、ちしきよく", growthHint: "ふしぎなことを調べたり、ともだちと話し合って発表したりする授業がたくさん。きみのアイデアが、未来をつくる力になる！", color: "bg-gradient-to-br from-blue-400 to-cyan-500", }, contribution: { title: "なかよしヒーロー", catchphrase: "きみがいるから、チームはひとつ！", description: "みんなの意見をきいて、なかよくまとめるのがとくいなヒーローだ。きみがいるだけで、クラスやチームのわがひろがっていくよ。", power: "きょうちょうせい、リーダーシップ", growthHint: "ともだちと協力して一つのものをつくりあげる学園祭などの行事で、きみのパワーはさいこうにかがやく！", color: "bg-gradient-to-br from-green-400 to-teal-500", }, };
+        const juniorHighResults = { harmony: { title: "調和のクリエイター", catchphrase: "君こそが、新しい時代の希望だ。", description: "知性、慈悲、勇気、貢献の心をバランスよく兼ね備えた、まさに次世代のリーダー。冷静な分析力と、他者への温かい眼差しを持ち、新しいアイデアで、対立ではなく調和を生み出すために行動できます。", strength: "バランス感覚、創造性、課題解決能力", growthHint: "創価学園が目指す「世界市民」の理想像に最も近いあなた。学園での学びすべてが、あなたの才能をさらに伸ばす糧となります。仲間と協力して一つのものを創り上げる学園祭などの行事を通して、その総合力を発揮してください。", color: "bg-gradient-to-br from-purple-400 to-indigo-500", }, courage: { title: "勇気のチャレンジャー", catchphrase: "その一歩が、変化の始まり。", description: "「おかしい」と感じたことに対して、沈黙していられない強い正義感を持っています。周りの空気に流されず、自分の信念に基づいて行動できる勇気の持ち主。あなたのその一歩が、より良い社会への変化を生み出す原動力となります。", strength: "正義感、リーダーシップ、信念を貫く力", growthHint: "創立者の思想を学ぶ中で、あなたの持つ勇気は「民衆に尽くす」という揺るぎないコンパスを得るでしょう。生徒会活動やディベートの機会は、あなたのリーダーシップを実践する最高の舞台です。", color: "bg-gradient-to-br from-red-400 to-orange-500", }, compassion: { title: "共感のアーティスト", catchphrase: "その優しさが、誰かの光になる。", description: "人の心の機微や、言葉にならない痛みを敏感に感じ取れる優しい心の持ち主。多様な価値観を尊重し、誰もが自分らしくいられる空間を作るのが得意です。あなたの存在そのものが、周りの人々の心を癒します。", strength: "共感力、傾聴力、繊細な感受性", growthHint: "その深い慈悲の心は、ボランティア活動や、生命の尊厳を学ぶ創価学園の人間教育の根幹に触れることで、より大きな力になります。文学や芸術に触れる授業も、あなたの感性を豊かにするでしょう。", color: "bg-gradient-to-br from-pink-400 to-rose-500", }, wisdom: { title: "知恵のストラテジスト", catchphrase: "その探究心が、未来を照らし出す。", description: "物事を感情だけでなく、データや事実に基づいて深く探究するのが好きなタイプ。なぜ？どうして？と問い続け、複雑な問題の根本原因や解決策を冷静に導き出します。その知性は、世界が抱える課題を解決する大きな武器になります。", strength: "分析力、論理的思考力、探究心", growthHint: "あなたの知的好奇心は、SGH（スーパーグローバルハイスクール）の課題研究や、本質を深く掘り下げる探究型の授業で満たされます。図書館の豊富な蔵書も、あなたの最高のパートナーです。", color: "bg-gradient-to-br from-blue-400 to-cyan-500", }, contribution: { title: "対話の冒険家", catchphrase: "君の勇気が、世界の橋になる。", description: "好奇心旺盛で、未知の世界や人々との出会いにワクワクするタイプ。文化や言葉の壁を恐れず、対話に飛び込んでいく勇気を持っています。人と人を繋ぎ、新しい友情や理解を生み出すコミュニケーターです。", strength: "行動力、コミュニケーション能力、チャレンジ精神", growthHint: "あなたの才能は、豊富な海外研修や、ネイティブ教員と日常的に交流できる環境でさらに輝きます。多様な仲間とのディスカッションを通じて、対話力に磨きをかけましょう。", color: "bg-gradient-to-br from-green-400 to-teal-500", }, };
+        const highSchoolResults = { harmony: { title: "共創のプロデューサー", catchphrase: "君が描く未来に、世界は巻き込まれる。", description: "多様な才能を見出し、繋ぎ合わせることで、一人では成し得ない大きな価値を生み出すプロデューサー。鋭い知性で本質を見抜き、深い共感力で人の心を動かし、勇気ある決断でチームを導き、社会への貢献という大きな舞台を創り上げます。", strength: "ビジョン構築力、協調性、プロジェクト推進力", growthHint: "多様な価値観が交差する現代社会で、あなたの才能は不可欠です。模擬国連やビジネスコンテストへの挑戦は、あなたのプロデュース能力をさらに磨き上げるでしょう。", color: "bg-gradient-to-br from-purple-400 to-indigo-500", }, courage: { title: "変革のパイオニア", catchphrase: "常識を壊し、未来を拓け。", description: "まだ誰も見たことのない未来を信じ、困難な道を着実に切り拓いていく開拓者。強い信念と情熱を持ち、失敗を恐れずに行動し続けます。あなたの挑戦する姿そのものが、周りの人々に勇気と希望を与えます。", strength: "行動力、不屈の精神、リーダーシップ", growthHint: "ボランティア活動や生徒会活動でリーダーシップを発揮することで、あなたの変革力はより実践的な力になります。歴史上の偉人たちの挑戦の物語も、あなたに多くのヒントを与えるでしょう。", color: "bg-gradient-to-br from-red-400 to-orange-500", }, compassion: { title: "対話のファシリテーター", catchphrase: "あなたの眼差しが、沈黙を言葉に変える。", description: "異なる意見や立場の間に立ち、深い傾聴と共感をもって対話の場を育む調停者。言葉にならない想いを汲み取り、誰もが安心して発言できる安全な空間を作り出すことで、真の相互理解を生み出します。", strength: "傾聴力、共感力、異文化理解力", growthHint: "文学作品を深く読み解き、登場人物の心情を考察することは、あなたの共感力をさらに豊かにします。地域の国際交流イベントへの参加も、多様な価値観に触れる絶好の機会です。", color: "bg-gradient-to-br from-pink-400 to-rose-500", }, wisdom: { title: "真理の探究者", catchphrase: "知の地平線の、その先へ。", description: "物事の表面的な事象に惑わされず、その背後にある本質や真理を粘り強く探究する学者。旺盛な知的好奇心と論理的な思考力を武器に、複雑に絡み合った世界の謎を一つ一つ解き明かしていきます。", strength: "分析力、論理的思考力、探究心", growthHint: "興味のある分野の専門書や論文を読み進めることは、あなたの探求心を刺激します。科学館や博物館に足を運び、専門家と対話することも、新たな発見に繋がるでしょう。", color: "bg-gradient-to-br from-blue-400 to-cyan-500", }, contribution: { title: "希望のアーキテクト", catchphrase: "アイデアを繋ぎ、社会をデザインする。", description: "人や情報、アイデアといった様々な要素を繋ぎ合わせ、社会課題を解決するための新しい仕組みをデザインする設計者。広い視野と柔軟な発想で、持続可能な未来への具体的な道筋を描き出します。", strength: "構想力、ネットワーキング能力、課題解決能力", growthHint: "社会課題に関するドキュメンタリーを観て、自分なりの解決策を考えてみましょう。地域のイベントやボランティアに参加し、様々な世代の人と繋がることも、あなたの構想力を豊かにします。", color: "bg-gradient-to-br from-green-400 to-teal-500", }, };
+        const universityResults = { harmony: { title: "共生のオーガナイザー", catchphrase: "多様な音を束ね、未来の交響曲を奏でる。", description: "異なる専門性や文化を持つ人々を組織し、共通の目標に向かって導く指揮者。俯瞰的な視点でプロジェクト全体を設計し、メンバー一人ひとりの才能が最大限に発揮される環境を創り出します。", strength: "組織構築力、ファシリテーション能力、ビジョン共有力", growthHint: "複数のサークルや団体に所属し、異なる文化に触れることは、あなたの視野を広げます。P.F.ドラッカーなどの経営学の名著も、組織論の理解を深める助けとなるでしょう。", color: "bg-gradient-to-br from-purple-400 to-indigo-500", }, courage: { title: "社会起業家（ソーシャル・アントレプレナー）", catchphrase: "その情熱で、社会課題に火を灯せ。", description: "利益追求だけでなく、社会的な課題の解決を事業の核に据える革新者。強い使命感を持ち、既存の枠組みにとらわれない斬新なアイデアと行動力で、持続可能なビジネスモデルを構築します。", strength: "課題発見力、事業構築力、リスクテイク精神", growthHint: "社会起業家に関する書籍を読んだり、講演会に参加したりしてみましょう。クラウドファンディングで小さなプロジェクトを立ち上げてみるのも、実践的な学びになります。", color: "bg-gradient-to-br from-red-400 to-orange-500", }, compassion: { title: "文化の翻訳家", catchphrase: "言葉と心の壁を越え、魂を繋ぐ。", description: "異なる文化や価値観の間に立ち、その背景にある歴史や思想を深く理解し、的確な言葉で双方に伝える架け橋。言語能力だけでなく、深い人間洞察に基づいたコミュニケーションで、真の国際理解を促進します。", strength: "異文化理解力、高度な語学力、感受性", growthHint: "専門分野以外の教養科目、特に哲学や人類学、歴史学を学ぶことは、あなたの人間理解を深めます。留学や海外インターンシップは、この才能を飛躍させる絶好の機会です。", color: "bg-gradient-to-br from-pink-400 to-rose-500", }, wisdom: { title: "知の探求者（リサーチャー）", catchphrase: "未知の領域に、最初の足跡を刻む。", description: "人類がまだ解明していない問いに挑み、緻密な調査と実験、論理的な考察を重ねて新たな知見を発見する研究者。その成果は、学問の発展のみならず、未来の社会を支える礎となります。", strength: "専門性、論理的思考力、情報収集・分析力", growthHint: "学会や研究会に積極的に参加し、第一線の研究者と議論を交わしましょう。自らの研究テーマについて、専門外の人に分かりやすく説明する練習も、思考の整理に繋がります。", color: "bg-gradient-to-br from-blue-400 to-cyan-500", }, contribution: { title: "課題解決のカタリスト", catchphrase: "人と知を繋ぎ、化学反応を起こす。", description: "社会に散在する課題と、それを解決できる可能性のある人・技術・情報を結びつけ、新たなプロジェクトを生み出す触媒。自身の専門性を軸に、分野を横断したネットワーキングで社会に貢献します。", strength: "課題解決能力、ネットワーキング能力、企画力", growthHint: "ハッカソンやアイデアソンに参加し、多様な専門性を持つ人々と協働する経験は、あなたの触媒としての能力を磨きます。NPOやベンチャーでのインターンシップもおすすめです。", color: "bg-gradient-to-br from-green-400 to-teal-500", }, };
+        const workingAdultResults = { harmony: { title: "ビジョナリー・リーダー", catchphrase: "未来を示し、多様な才能と共に歩む。", description: "明確なビジョンを掲げ、多様な個性を持つメンバーの心を一つに束ねて目標達成に導く指導者。個々の強みを引き出し、組織全体のエネルギーを最大化することで、困難な時代を乗り越える大きな力を生み出します。", strength: "統率力、ビジョン構築力、人材育成能力", growthHint: "リーダーシップに関する古典や、歴史上の偉大な指導者の伝記を読むことは、多くの示唆を与えてくれます。また、業務外でメンターとして後輩の相談に乗ることも、あなたの器を大きくするでしょう。", color: "bg-gradient-to-br from-purple-400 to-indigo-500", }, courage: { title: "チェンジ・エージェント", catchphrase: "安定を揺さぶり、組織を未来へ動かす。", description: "現状維持を良しとせず、常に組織や社会の変革を仕掛ける改革者。既得権益や古い慣習としがらみを恐れず、強い意志と戦略的な思考で、あるべき姿への道筋を切り拓きます。", strength: "改革推進力、交渉力、ストレス耐性", growthHint: "業界の常識を覆したイノベーションの事例を研究してみましょう。また、社内の非公式な勉強会などを主催し、変革の輪を広げていくことも有効な一歩です。", color: "bg-gradient-to-br from-red-400 to-orange-500", }, compassion: { title: "組織文化の醸成者", catchphrase: "心理的安全性が、最高のパフォーマンスを生む。", description: "誰もが自分らしく、安心して挑戦できる「心理的安全性」の高い組織文化を育む守護者。深い共感力でメンバーに寄り添い、信頼に基づいた人間関係の土壌を築くことで、組織の持続的な成長を支えます。", strength: "共感力、傾聴力、組織開発能力", growthHint: "コーチングやカウンセリングのスキルを学ぶことは、あなたの対話能力をさらに高めます。職場での小さな成功や努力を見つけて認め、称賛する習慣も、良い文化作りの第一歩です。", color: "bg-gradient-to-br from-pink-400 to-rose-500", }, wisdom: { title: "知のソムリエ", catchphrase: "膨大な情報から、本質の一滴を見つけ出す。", description: "複雑で膨大な情報の中から、意思決定に不可欠な本質的情報（インサイト）を的確に抽出し、分かりやすく提供する専門家。その深い洞察力は、組織が進むべき道を照らす羅針盤となります。", strength: "情報分析力、本質を見抜く力、専門性", growthHint: "自分の専門分野だけでなく、リベラルアーツ（教養）を学び続けることで、物事を多角的に見る力が養われます。得た知識をブログやレポートで発信し、思考を整理する習慣も有効です。", color: "bg-gradient-to-br from-blue-400 to-cyan-500", }, contribution: { title: "境界を越える越境者（コネクター）", catchphrase: "組織の壁を壊し、新たな価値を共創する。", description: "所属する組織の枠を越え、異業種や異分野の人々と積極的に繋がり、新たな協業（コラボレーション）を生み出す媒介者。そのネットワークは、予測不能なイノベーションの源泉となります。", strength: "ネットワーキング能力、異文化適応力、共創力", growthHint: "社外のセミナーや勉強会、異業種交流会に積極的に参加してみましょう。また、プロボノ（専門スキルを活かしたボランティア）活動などを通じて、社会課題解決に直接貢献することも、あなたの世界を広げます。", color: "bg-gradient-to-br from-green-400 to-teal-500", }, };
+
+        const StartScreen = ({ onStart }) => (
+          <div className="text-center p-8">
+            <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">君の中に眠る、世界とつながる才能を見つけよう。</h1>
+            <h2 className="text-xl md:text-2xl font-semibold text-indigo-600 mb-8">世界市民タイプ診断</h2>
+            <p className="text-gray-600 mb-12 max-w-2xl mx-auto">簡単な質問に答えるだけで、あなたの「世界市民タイプ」がわかる！自分でも知らなかった、未来で輝く「才能」を発見してみよう。</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-4xl mx-auto">
+              <button onClick={() => onStart('elementary')} className="w-full bg-gradient-to-r from-yellow-400 to-orange-500 text-white font-bold py-4 px-6 rounded-full shadow-lg transform hover:scale-105 transition-transform duration-300 text-lg">小学生</button>
+              <button onClick={() => onStart('juniorHigh')} className="w-full bg-gradient-to-r from-cyan-400 to-blue-600 text-white font-bold py-4 px-6 rounded-full shadow-lg transform hover:scale-105 transition-transform duration-300 text-lg">中学生</button>
+              <button onClick={() => onStart('highSchool')} className="w-full bg-gradient-to-r from-lime-400 to-green-500 text-white font-bold py-4 px-6 rounded-full shadow-lg transform hover:scale-105 transition-transform duration-300 text-lg">高校生</button>
+              <button onClick={() => onStart('university')} className="w-full bg-gradient-to-r from-purple-400 to-indigo-500 text-white font-bold py-4 px-6 rounded-full shadow-lg transform hover:scale-105 transition-transform duration-300 text-lg">大学生</button>
+              <button onClick={() => onStart('workingAdult')} className="w-full md:col-span-2 lg:col-span-1 bg-gradient-to-r from-pink-500 to-rose-600 text-white font-bold py-4 px-6 rounded-full shadow-lg transform hover:scale-105 transition-transform duration-300 text-lg">社会人</button>
+            </div>
+          </div>
+        );
+
+        const QuestionScreen = ({ userType, onComplete }) => {
+          const questions = useMemo(() => {
+            switch (userType) {
+              case 'elementary': return elementaryQuestions;
+              case 'juniorHigh': return juniorHighQuestions;
+              case 'highSchool': return highSchoolQuestions;
+              case 'university': return universityQuestions;
+              case 'workingAdult': return workingAdultQuestions;
+              default: return [];
+            }
+          }, [userType]);
+          const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+          const [scores, setScores] = useState({ wisdom: 0, compassion: 0, courage: 0, contribution: 0 });
+          const [isFading, setIsFading] = useState(false);
+          const handleAnswer = (type) => {
+            setIsFading(true);
+            setTimeout(() => {
+              const newScores = { ...scores, [type]: scores[type] + 1 };
+              setScores(newScores);
+              if (currentQuestionIndex < questions.length - 1) {
+                setCurrentQuestionIndex(prev => prev + 1);
+                setIsFading(false);
+              } else {
+                onComplete(newScores);
+              }
+            }, 300);
+          };
+          const currentQuestion = questions[currentQuestionIndex];
+          if (!currentQuestion) return null;
+          const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
+          return (
+            <div className="w-full max-w-3xl mx-auto p-4 md:p-8">
+              <div className="w-full bg-gray-200 rounded-full h-2.5 mb-6"><div className="bg-green-500 h-2.5 rounded-full" style={{ width: `${progress}%`, transition: 'width 0.5s' }}></div></div>
+              <div className={`bg-white rounded-2xl shadow-xl p-6 md:p-10 transition-opacity duration-300 ${isFading ? 'opacity-0' : 'opacity-100'}`}>
+                <h3 className="text-xl md:text-2xl font-bold text-gray-800 mb-6"><span className="text-indigo-500 font-black mr-2">Q{currentQuestionIndex + 1}.</span> {currentQuestion.question}</h3>
+                <div className="space-y-4">
+                  {currentQuestion.answers.map((answer, index) => (
+                    <button key={index} onClick={() => handleAnswer(answer.type)} className="w-full text-left text-gray-700 bg-gray-100 hover:bg-indigo-100 border-l-4 border-transparent hover:border-indigo-500 p-4 rounded-lg transition-all duration-200">{answer.text}</button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          );
+        };
+
+        const ResultScreen = ({ userType, scores, onRestart }) => {
+          const [mission, setMission] = useState('');
+          const [isLoading, setIsLoading] = useState(false);
+          const [error, setError] = useState('');
+          const result = useMemo(() => {
+            const resultsData = { elementary: elementaryResults, juniorHigh: juniorHighResults, highSchool: highSchoolResults, university: universityResults, workingAdult: workingAdultResults, }[userType];
+            const defaultResultKey = userType === 'elementary' ? 'courage' : 'harmony';
+            const defaultResult = resultsData[defaultResultKey];
+            if (!scores) return defaultResult;
+            const sortedScores = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+            if (sortedScores.length === 0) return defaultResult;
+            const maxScore = sortedScores[0][1];
+            const topTypes = sortedScores.filter(score => score[1] === maxScore).map(item => item[0]);
+            let resultType = topTypes[0];
+            if (userType !== 'elementary' && topTypes.length > 1 && topTypes.length < 4) { resultType = 'harmony'; }
+            return resultsData[resultType] || defaultResult;
+          }, [userType, scores]);
+
+          const generateMission = async () => {
+            setIsLoading(true); setMission(''); setError('');
+            const ageGroupMap = { elementary: '小学生', juniorHigh: '中学生', highSchool: '高校生', university: '大学生', workingAdult: '社会人', };
+            const ageGroup = ageGroupMap[userType];
+            const prompt = `あなたは生徒や社会人を励ます、創造的で優しいメンターです。以下の「世界市民タイプ」を持つ${ageGroup}に向けて、その人の強みを活かせるような、希望に満ちた「あなただけの特別なミッション」を1つだけ、簡潔に、そして力強い言葉で提案してください。ミッションは、日常生活の中で挑戦できる具体的な行動にしてください。\n\nタイプ: ${result.title}\n特徴: ${result.description}\n\nミッションは以下の形式で、日本語で出力してください。\n【ミッション】：（ここにミッションを記述）`;
+            
+            try {
+              console.log('Calling generate-mission function...');
+              const response = await fetch('/.netlify/functions/generate-mission', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ prompt: prompt }),
+              });
+              
+              console.log('Response status:', response.status);
+              console.log('Response ok:', response.ok);
+              
+              if (!response.ok) { 
+                const errorText = await response.text();
+                console.error('Response error:', errorText);
+                throw new Error(`APIエラーが発生しました (${response.status}): ${response.statusText}`);
+              }
+              
+              const data = await response.json();
+              console.log('Response data:', data);
+              
+              if (data.error) {
+                throw new Error(data.error);
+              }
+              
+              if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts[0]) {
+                setMission(data.candidates[0].content.parts[0].text);
+              } else { 
+                console.error('Unexpected response format:', data);
+                throw new Error("AIからの応答が予期せぬ形式です。"); 
+              }
+            } catch (e) {
+              console.error('Generate mission error:', e);
+              setError(`ミッションの生成に失敗しました: ${e.message}`);
+            } finally {
+              setIsLoading(false);
+            }
+          };
+          
+          const [isShowing, setIsShowing] = useState(false);
+          useEffect(() => { const timer = setTimeout(() => setIsShowing(true), 100); return () => clearTimeout(timer); }, []);
+          const shareUrl = "https://www.soka.ac.jp/";
+          const shareText = `私の世界市民タイプは「${result.title}」でした！あなたも診断してみよう！ #世界市民タイプ診断`;
+          const strengthLabel = userType === 'elementary' ? 'かくされたパワー' : 'あなたの強み';
+          const strengthValue = userType === 'elementary' ? result.power : result.strength;
+          const growthHintLabel = userType.includes('Adult') || userType.includes('university') ? '成長のヒント' : '創価学園での学び';
+          const linkUrl = userType.includes('Adult') || userType.includes('university') ? "https://www.soka.ac.jp/" : "https://www.soka.ed.jp/";
+          const linkLabel = userType.includes('Adult') || userType.includes('university') ? "創価大学について知る" : "創価学園について知る";
+
+          return (
+            <div className={`w-full max-w-3xl mx-auto p-4 md:p-8 transition-opacity duration-500 ${isShowing ? 'opacity-100' : 'opacity-0'}`}>
+              <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+                <div className={`p-8 text-white text-center ${result.color}`}>
+                  <p className="font-semibold text-lg">あなたのタイプは...</p>
+                  <h2 className="text-4xl font-black my-2">{result.title}</h2>
+                  <p className="text-xl font-bold">{result.catchphrase}</p>
+                </div>
+                <div className="p-6 md:p-8 space-y-6">
+                  <div><h3 className="font-bold text-indigo-600 text-lg mb-2">どんな人？</h3><p className="text-gray-700">{result.description}</p></div>
+                  <div><h3 className="font-bold text-indigo-600 text-lg mb-2">{strengthLabel}</h3><p className="text-gray-700 font-semibold">{strengthValue}</p></div>
+                  <div><h3 className="font-bold text-indigo-600 text-lg mb-2">{growthHintLabel}</h3><p className="text-gray-700">{result.growthHint}</p></div>
+                  <div className="border-t-2 border-dashed border-gray-200 pt-6 text-center">
+                    {!mission && !isLoading && (<button onClick={generateMission} className="bg-gradient-to-r from-amber-400 to-yellow-500 text-white font-bold py-3 px-8 rounded-full shadow-lg transform hover:scale-105 transition-transform duration-300">✨ AIがあなただけのミッションを生成</button>)}
+                    {isLoading && (<div className="flex justify-center items-center space-x-2 text-gray-600"><div className="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-500"></div><span>ミッションを生成中...</span></div>)}
+                    {error && <p className="text-red-500 mt-4">{error}</p>}
+                    {mission && (<div className="mt-4 p-4 bg-indigo-50 rounded-lg border-l-4 border-indigo-500"><p className="text-gray-800 text-left whitespace-pre-wrap">{mission}</p></div>)}
+                  </div>
+                </div>
+              </div>
+              <div className="text-center mt-8">
+                <h3 className="font-bold text-gray-700 text-lg mb-4">その才能を、未来を創る力に変えよう。</h3>
+                <div className="flex flex-col md:flex-row justify-center items-center gap-4 mb-6">
+                  <a href={linkUrl} target="_blank" rel="noopener noreferrer" className="bg-indigo-600 text-white font-bold py-3 px-6 rounded-full hover:bg-indigo-700 transition-colors w-full md:w-auto">{linkLabel}</a>
+                  <a href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`} target="_blank" rel="noopener noreferrer" className="bg-blue-400 text-white font-bold py-3 px-6 rounded-full hover:bg-blue-500 transition-colors w-full md:w-auto">結果をXでシェア</a>
+                </div>
+                <button onClick={onRestart} className="text-gray-500 hover:text-indigo-600 font-semibold transition-colors">もう一度診断する</button>
+              </div>
+            </div>
+          );
+        };
+
+        const App = () => {
+          const [screen, setScreen] = useState('start');
+          const [userType, setUserType] = useState(null);
+          const [finalScores, setFinalScores] = useState(null);
+          const handleStart = (type) => { setUserType(type); setScreen('question'); };
+          const handleComplete = (scores) => { setFinalScores(scores); setScreen('result'); };
+          const handleRestart = () => { setScreen('start'); setUserType(null); setFinalScores(null); };
+          return (
+            <div className="bg-gray-50 min-h-screen flex items-center justify-center font-sans">
+              <main className="w-full">
+                {screen === 'start' && <StartScreen onStart={handleStart} />}
+                {screen === 'question' && <QuestionScreen userType={userType} onComplete={handleComplete} />}
+                {screen === 'result' && <ResultScreen userType={userType} scores={finalScores} onRestart={handleRestart} />}
+              </main>
+            </div>
+          );
+        };
+        
+        // ▼▼▼ ここからReactアプリを描画するコード ▼▼▼
+        const container = document.getElementById('root');
+        const root = ReactDOM.createRoot(container);
+        root.render(<App />);
+
+    </script>
+</body>
+</html>

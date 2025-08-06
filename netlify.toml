@@ -1,0 +1,7 @@
+[build]
+  command = "echo 'Build complete'"
+  publish = "."
+  functions = "functions"
+
+[functions]
+  directory = "functions"
